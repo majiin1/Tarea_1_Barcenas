@@ -1,0 +1,108 @@
+
+
+import os
+
+# Nombre del archivo FASTA
+archivo_fasta = input("Nombre del archivo FASTA: ")
+
+# Obtener nombre del organismo
+nombre_organismo = os.path.basename(archivo_fasta).split(".")[0]
+
+# Bases complementarias
+complemento = {
+    "A": "T",
+    "T": "A",
+    "G": "C",
+    "C": "G"
+}
+
+total_gc = 0
+total_bases = 0
+numero_linea = 0
+primera_secuencia = False
+secuencia_anterior = ""
+
+# Abrir archivo FASTA
+with open(archivo_fasta, "r") as archivo:
+
+    for linea in archivo:
+        numero_linea += 1
+        linea = linea.strip()
+
+        if linea == "":
+            continue
+
+        # 1. Identificar encabezados
+        if linea.startswith(">"):
+            encabezado = linea[1:].replace(" ", "")
+
+            print("Organismo " + nombre_organismo +
+                  ", contig " + encabezado)
+
+            primera_secuencia = True
+            secuencia_anterior = ""
+
+        else:
+            secuencia = linea.upper()
+
+            # 2. Calcular contenido GC por línea
+            cantidad_gc = secuencia.count("G") + secuencia.count("C")
+            gc_linea = cantidad_gc / len(secuencia)
+
+            print("GC línea " + str(numero_linea) + ": " +
+                  format(gc_linea, ".2f").lstrip("0"))
+
+            total_gc += cantidad_gc
+            total_bases += len(secuencia)
+
+            # 3. Obtener secuencia complementaria
+            if primera_secuencia:
+                complementaria = ""
+
+                for base in secuencia:
+                    complementaria += complemento.get(base, base)
+
+                print(complementaria)
+                primera_secuencia = False
+
+            # 4. Buscar codón ATG
+            secuencia_completa = secuencia_anterior + secuencia
+
+            if "ATG" in secuencia_completa:
+                print("ATG en línea " + str(numero_linea))
+
+            secuencia_anterior = secuencia[-2:]
+
+# 5. Calcular GC total del archivo
+if total_bases > 0:
+    gc_total = total_gc / total_bases
+
+    print("GC total del archivo: " +
+          format(gc_total, ".2f").lstrip("0"))
+else:
+    print("El archivo no contiene secuencias.")
+
+
+
+Organismo, contig chr1
+GC línea 2: .45
+Complementaria: TTTTTACTAAA
+ATG en línea 2
+
+Organismo Organismo, contig chr2
+GC línea 5: .53
+Complementaria: TACGGCAT
+
+ATG en línea 5
+
+GC total del archivo: .49
+
+
+
+
+https://www.loom.com/share/32b41cee19ef4c27bec6b2567c4e3d58
+
+
+
+
+
